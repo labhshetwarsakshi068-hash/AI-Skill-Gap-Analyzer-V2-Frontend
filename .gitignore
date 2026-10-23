@@ -1,0 +1,10 @@
+
+__pycache__/
+*.pyc
+venv/
+.env
+.streamlit/secrets.toml
+
+app_backup.py
+app_old.py
+app_recovery_copy.py
