@@ -262,25 +262,35 @@ elif page == "Register":
             email = st.text_input("Email Address")
             password = st.text_input("Password", type="password")
             confirm = st.text_input("Confirm Password", type="password")
+
             education = st.selectbox(
                 "Education",
-                ["Select Education", "Diploma", "B.Tech", "B.E.",
-                 "B.Sc", "M.Tech", "MCA", "Other"]
+                [
+                    "Select Education", "Diploma", "B.Tech", "B.E.",
+                    "B.Sc", "M.Tech", "MCA", "Other"
+                ]
             )
+
             branch = st.selectbox(
                 "Branch",
-                ["Select Branch", "Computer Science",
-                 "Information Technology", "AI & Data Science",
-                 "Electronics", "Other"]
+                [
+                    "Select Branch", "Computer Science",
+                    "Information Technology", "AI & Data Science",
+                    "Electronics", "Other"
+                ]
             )
+
             role = st.selectbox(
                 "Target Career Role",
-                ["Select Role", "Data Scientist", "Web Developer",
-                 "Data Analyst", "Java Developer", "AI/ML Engineer"]
+                [
+                    "Select Role", "Data Scientist", "Web Developer",
+                    "Data Analyst", "Java Developer", "AI/ML Engineer"
+                ]
             )
+
             submitted = st.form_submit_button(
-                "Create Account →", use_container_width=True
-            )
+                "Create Account →",
+                use_container_width=True
             )
 
         if submitted:
@@ -314,19 +324,23 @@ elif page == "Register":
                     )
 
                 if status == 201 and result.get("success"):
-                    st.success("Registration successful! Please log in.")
+                    st.success(
+                        "Registration successful! Please log in."
+                    )
 
                 elif status is None:
                     st.error("Could not connect to the backend.")
                     st.caption(result.get("message", ""))
 
                 else:
-                    st.error(result.get("message", "Registration failed."))
+                    st.error(
+                        result.get("message", "Registration failed.")
+                    )
 
         st.markdown("Already registered?")
+
         if st.button("Go to Login"):
             go_to("Login")
-
 # =========================================================
 # LOGIN
 # =========================================================
