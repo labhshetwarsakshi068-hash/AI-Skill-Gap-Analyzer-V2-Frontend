@@ -282,34 +282,45 @@ elif page == "Register":
                 "Create Account →", use_container_width=True
             )
 
-        if submitted:
+               if submitted:
             if not all([name.strip(), email.strip(), password, confirm]):
                 st.error("Please fill in all fields.")
+
             elif password != confirm:
                 st.error("Passwords do not match.")
+
             elif len(password) < 8:
                 st.error("Password must contain at least 8 characters.")
+
             elif education == "Select Education":
                 st.error("Please select your education.")
+
             elif branch == "Select Branch":
                 st.error("Please select your branch.")
+
             elif role == "Select Role":
                 st.error("Please select your target role.")
-        else:
-            with st.spinner("Creating your account..."):
-            status, result = register_user(
-            name.strip(),
-            email.strip(),
-            password,
-            education,
-            branch,
-            role
-        )
 
-    if status == 201 and result.get("success"):
-        st.success("Registration successful! Please log in.")
-    else:
-        st.error(result.get("message", "Registration failed."))
+            else:
+                with st.spinner("Creating your account..."):
+                    status, result = register_user(
+                        name.strip(),
+                        email.strip(),
+                        password,
+                        education,
+                        branch,
+                        role
+                    )
+
+                if status == 201 and result.get("success"):
+                    st.success("Registration successful! Please log in.")
+
+                elif status is None:
+                    st.error("Could not connect to the backend.")
+                    st.caption(result.get("message", ""))
+
+                else:
+                    st.error(result.get("message", "Registration failed."))
 
         st.markdown("Already registered?")
         if st.button("Go to Login"):
