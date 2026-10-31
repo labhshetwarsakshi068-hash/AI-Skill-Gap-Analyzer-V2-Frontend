@@ -295,19 +295,21 @@ elif page == "Register":
                 st.error("Please select your branch.")
             elif role == "Select Role":
                 st.error("Please select your target role.")
-            else:
-                st.session_state.pending_registration = {
-                    "name": name.strip(),
-                    "email": email.strip(),
-                    "password": password,
-                    "education": education,
-                    "branch": branch,
-                    "target_role": role
-                }
-                st.warning(
-                    "Form validated. Registration will work after we "
-                    "connect the backend and database."
-                )
+        else:
+            with st.spinner("Creating your account..."):
+            status, result = register_user(
+            name.strip(),
+            email.strip(),
+            password,
+            education,
+            branch,
+            role
+        )
+
+    if status == 201 and result.get("success"):
+        st.success("Registration successful! Please log in.")
+    else:
+        st.error(result.get("message", "Registration failed."))
 
         st.markdown("Already registered?")
         if st.button("Go to Login"):
