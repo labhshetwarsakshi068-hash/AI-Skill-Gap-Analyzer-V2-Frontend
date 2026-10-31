@@ -278,11 +278,11 @@ elif page == "Register":
                 ["Select Role", "Data Scientist", "Web Developer",
                  "Data Analyst", "Java Developer", "AI/ML Engineer"]
             )
-            submitted = st.form_submit_button(
-                "Create Account →", use_container_width=True
+                 submitted = st.form_submit_button(
+                        "Create Account →", use_container_width=True
             )
 
-      if submitted:
+        if submitted:
             if not all([name.strip(), email.strip(), password, confirm]):
                 st.error("Please fill in all fields.")
 
