@@ -5,18 +5,24 @@ import requests
 # Backend API URL
 API_URL = "https://ai-skill-gap-analyzer-backend-1.onrender.com"
 
-def login_user(email, password):
-    """Login through the Flask backend."""
+def register_user(name, email, password, education, branch, target_role):
+    """Register a new user through the Flask backend."""
 
-    url = f"{API_URL}/api/login"
+    url = f"{API_URL}/api/register"
+
+    payload = {
+        "name": name,
+        "email": email,
+        "password": password,
+        "education": education,
+        "branch": branch,
+        "target_role": target_role
+    }
 
     try:
         response = requests.post(
             url,
-            json={
-                "email": email,
-                "password": password
-            },
+            json=payload,
             timeout=30
         )
 
@@ -24,9 +30,6 @@ def login_user(email, password):
             result = response.json()
         except ValueError:
             result = {"message": response.text}
-
-        if response.status_code == 200:
-            result["token"] = result.get("access_token")
 
         return response.status_code, result
 
