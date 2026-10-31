@@ -282,7 +282,7 @@ elif page == "Register":
                 "Create Account →", use_container_width=True
             )
 
-               if submitted:
+      if submitted:
             if not all([name.strip(), email.strip(), password, confirm]):
                 st.error("Please fill in all fields.")
 
