@@ -3,7 +3,7 @@
 import requests
 
 # Backend API URL
-API_URL = "http://127.0.0.1:5000"
+API_URL = "https://ai-skill-gap-analyzer-backend-1.onrender.com"
 
 def login_user(email, password):
     """Login through the Flask backend."""
