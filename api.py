@@ -1,10 +1,11 @@
 
-
 import requests
 
 # Backend API URL
 API_URL = "https://ai-skill-gap-analyzer-backend-1.onrender.com"
 
+
+# REGISTER USER
 def register_user(name, email, password, education, branch, target_role):
     """Register a new user through the Flask backend."""
 
@@ -37,6 +38,39 @@ def register_user(name, email, password, education, branch, target_role):
         return None, {"message": str(error)}
 
 
+# LOGIN USER
+def login_user(email, password):
+    """Login user through the Flask backend."""
+
+    url = f"{API_URL}/api/login"
+
+    payload = {
+        "email": email,
+        "password": password
+    }
+
+    try:
+        response = requests.post(
+            url,
+            json=payload,
+            timeout=30
+        )
+
+        try:
+            result = response.json()
+        except ValueError:
+            result = {"message": response.text}
+
+        if response.status_code == 200:
+            result["token"] = result.get("access_token")
+
+        return response.status_code, result
+
+    except requests.RequestException as error:
+        return None, {"message": str(error)}
+
+
+# UPLOAD RESUME
 def upload_resume(token, user_id, uploaded_file):
     """Upload a resume to the backend for skill analysis."""
 
@@ -77,15 +111,24 @@ def upload_resume(token, user_id, uploaded_file):
     except requests.RequestException as error:
         return None, {"message": str(error)}
 
+
+# GET USER SKILLS
 def get_user_skills(token, user_id):
     """Fetch the logged-in user's saved skills."""
+
     url = f"{API_URL}/api/user-skills/{user_id}"
-    headers = {"Authorization": f"Bearer {token}"}
+
+    headers = {
+        "Authorization": f"Bearer {token}"
+    }
 
     try:
         response = requests.get(
-            url, headers=headers, timeout=30
+            url,
+            headers=headers,
+            timeout=30
         )
+
         try:
             result = response.json()
         except ValueError:
@@ -97,12 +140,16 @@ def get_user_skills(token, user_id):
         return None, {"message": str(error)}
 
 
+# GET JOB ROLES
 def get_job_roles():
     """Fetch available target job roles."""
+
     try:
         response = requests.get(
-            f"{API_URL}/api/job-roles", timeout=30
+            f"{API_URL}/api/job-roles",
+            timeout=30
         )
+
         try:
             result = response.json()
         except ValueError:
@@ -114,9 +161,14 @@ def get_job_roles():
         return None, {"message": str(error)}
 
 
+# GET SKILL GAP
 def get_skill_gap(token, user_id, role_id):
     """Analyze the user's skills against a target role."""
-    headers = {"Authorization": f"Bearer {token}"}
+
+    headers = {
+        "Authorization": f"Bearer {token}"
+    }
+
     params = {
         "user_id": user_id,
         "role_id": role_id
@@ -129,6 +181,7 @@ def get_skill_gap(token, user_id, role_id):
             params=params,
             timeout=30
         )
+
         try:
             result = response.json()
         except ValueError:
@@ -139,6 +192,8 @@ def get_skill_gap(token, user_id, role_id):
     except requests.RequestException as error:
         return None, {"message": str(error)}
 
+
+# AI RECOMMENDATION
 def get_ai_recommendation(token, user_id, role_id):
     """Fetch AI-powered career recommendations from Flask backend."""
 
@@ -168,3 +223,4 @@ def get_ai_recommendation(token, user_id, role_id):
 
     except requests.RequestException as error:
         return None, {"message": str(error)}
+
