@@ -52,7 +52,7 @@ if st.session_state.logged_in:
         "Logout"
     ]
 else:
-    pages = ["Home", "Register", "Login", "Forgot Password"]"]
+    pages = ["Home", "Register", "Login", "Forgot Password"]
 
 with st.sidebar:
     st.markdown(
