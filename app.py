@@ -1,6 +1,13 @@
 import streamlit as st
 from pathlib import Path
-from api import get_ai_recommendation, login_user, get_job_roles, register_user
+from api import (
+    get_ai_recommendation,
+    get_progress,
+    update_progress,
+    login_user,
+    get_job_roles,
+    register_user
+)
 
 st.set_page_config(
     page_title="AI Skill Gap Analyzer",
