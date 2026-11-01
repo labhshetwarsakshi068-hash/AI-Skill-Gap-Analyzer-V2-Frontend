@@ -223,4 +223,73 @@ def get_ai_recommendation(token, user_id, role_id):
 
     except requests.RequestException as error:
         return None, {"message": str(error)}
+# =========================================================
+# PROGRESS TRACKING - GET PROGRESS
+# =========================================================
 
+def get_progress(token, user_id, role_id):
+    """Fetch user's saved learning progress."""
+
+    headers = {
+        "Authorization": f"Bearer {token}"
+    }
+
+    params = {
+        "user_id": user_id,
+        "role_id": role_id
+    }
+
+    try:
+        response = requests.get(
+            f"{API_URL}/api/progress",
+            headers=headers,
+            params=params,
+            timeout=30
+        )
+
+        try:
+            result = response.json()
+        except ValueError:
+            result = {"message": response.text}
+
+        return response.status_code, result
+
+    except requests.RequestException as error:
+        return None, {"message": str(error)}
+
+
+# =========================================================
+# PROGRESS TRACKING - UPDATE PROGRESS
+# =========================================================
+
+def update_progress(token, user_id, role_id, skill_id, is_completed):
+    """Save or update skill completion status."""
+
+    headers = {
+        "Authorization": f"Bearer {token}"
+    }
+
+    data = {
+        "user_id": user_id,
+        "role_id": role_id,
+        "skill_id": skill_id,
+        "is_completed": is_completed
+    }
+
+    try:
+        response = requests.post(
+            f"{API_URL}/api/progress",
+            headers=headers,
+            json=data,
+            timeout=30
+        )
+
+        try:
+            result = response.json()
+        except ValueError:
+            result = {"message": response.text}
+
+        return response.status_code, result
+
+    except requests.RequestException as error:
+        return None, {"message": str(error)}
