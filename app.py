@@ -774,24 +774,28 @@ elif page == "Dashboard":
         if st.button("Get Recommendations →", use_container_width=True):
             go_to("AI Recommendations")
 
+
 # =========================================================
 # RESUME SKILLS
 # =========================================================
 elif page == "Resume Skills":
-    st.title("Resume Skills")
 
+    st.title("📄 Resume Skills")
     st.caption("Upload your resume to begin your skill assessment.")
 
     with st.container(border=True):
+
         uploaded = st.file_uploader(
             "Upload your resume (PDF, DOCX or Image)",
             type=["pdf", "docx", "jpg", "jpeg", "png"]
         )
 
         if uploaded:
+
             st.success(f"Selected file: {uploaded.name}")
 
             if st.button("Analyze Resume", use_container_width=True):
+
                 try:
                     from api import upload_resume
 
@@ -805,7 +809,9 @@ elif page == "Resume Skills":
                         st.warning("User ID not found. Please login again.")
 
                     else:
+
                         with st.spinner("Analyzing your resume..."):
+
                             status, result = upload_resume(
                                 token,
                                 user["id"],
@@ -813,22 +819,177 @@ elif page == "Resume Skills":
                             )
 
                         if status == 200:
+
                             st.success("Resume uploaded successfully!")
-                            st.write("Analysis result:")
-                            st.json(result)
+
+                            detected = result.get("detected_skills", [])
+                            saved = result.get("saved_skills", [])
+                            not_found = result.get("not_found_skills", [])
+
+                            total_detected = result.get(
+                                "total_detected_skills",
+                                len(detected)
+                            )
+
+                            total_saved = result.get(
+                                "total_saved_skills",
+                                len(saved)
+                            )
+
+                            # SUMMARY
+                            st.divider()
+                            st.subheader("📊 Resume Analysis Summary")
+
+                            col1, col2, col3 = st.columns(3)
+
+                            col1.metric(
+                                "Detected Skills",
+                                total_detected
+                            )
+
+                            col2.metric(
+                                "Saved Skills",
+                                total_saved
+                            )
+
+                            col3.metric(
+                                "Not Found",
+                                len(not_found)
+                            )
+
+                            # DETECTED SKILLS
+                            st.divider()
+                            st.subheader("✅ Detected Skills")
+
+                            if detected:
+
+                                categories = {
+                                    "Programming Languages": [
+                                        "Python", "Java", "C++", "C",
+                                        "JavaScript", "PHP"
+                                    ],
+                                    "Web Technologies": [
+                                        "HTML", "CSS", "React",
+                                        "Angular", "Node.js"
+                                    ],
+                                    "Data Science": [
+                                        "Pandas", "NumPy", "Matplotlib",
+                                        "Machine Learning", "Deep Learning"
+                                    ],
+                                    "Database": [
+                                        "SQL", "MySQL", "MongoDB",
+                                        "PostgreSQL"
+                                    ],
+                                    "DevOps & Cloud": [
+                                        "Docker", "Kubernetes", "AWS",
+                                        "Azure", "Jenkins", "Git"
+                                    ],
+                                    "Tools & Platforms": [
+                                        "GitHub", "Linux", "VS Code"
+                                    ]
+                                }
+
+                                displayed_skills = set()
+
+                                for category, category_skills in categories.items():
+
+                                    matched = [
+                                        skill for skill in detected
+                                        if skill.lower() in [
+                                            item.lower()
+                                            for item in category_skills
+                                        ]
+                                    ]
+
+                                    if matched:
+
+                                        st.markdown(f"**{category}**")
+
+                                        st.write(" · ".join(matched))
+
+                                        displayed_skills.update(
+                                            skill.lower()
+                                            for skill in matched
+                                        )
+
+                                other_skills = [
+                                    skill for skill in detected
+                                    if skill.lower() not in displayed_skills
+                                ]
+
+                                if other_skills:
+
+                                    st.markdown("**Other Skills**")
+                                    st.write(" · ".join(other_skills))
+
+                            else:
+
+                                st.info("No skills detected in this resume.")
+
+                            # SAVED SKILLS
+                            st.divider()
+                            st.subheader("💾 Skills Saved in Database")
+
+                            if saved:
+                                st.write(" · ".join(saved))
+                                st.success(
+                                    f"{total_saved} skills saved successfully."
+                                )
+                            else:
+                                st.info("No skills were saved.")
+
+                            # NOT FOUND SKILLS
+                            st.divider()
+                            st.subheader("⚠️ Skills Not Found")
+
+                            if not_found:
+                                st.write(" · ".join(not_found))
+                            else:
+                                st.success("All detected skills were saved!")
+
+                            # FILE INFORMATION
+                            with st.expander("📁 Resume File Details"):
+
+                                st.write(
+                                    "**Original Filename:**",
+                                    result.get("filename", uploaded.name)
+                                )
+
+                                st.write(
+                                    "**Saved Filename:**",
+                                    result.get("saved_filename", "N/A")
+                                )
+
+                                st.write(
+                                    "**User ID:**",
+                                    result.get("user_id", "N/A")
+                                )
+
+                                st.write(
+                                    "**Status:**",
+                                    result.get("message", "Success")
+                                )
 
                         elif status is None:
+
                             st.error("Could not connect to the backend.")
-                            st.caption(str(result.get("message", "")))
+
+                            st.caption(
+                                str(result.get("message", ""))
+                            )
 
                         else:
+
                             st.error(f"Upload failed (HTTP {status}).")
-                            st.json(result)
+
+                            st.write(
+                                result.get("message", "Please try again.")
+                            )
 
                 except Exception as error:
+
                     st.error("Something went wrong.")
                     st.caption(str(error))
-
 
 # SKILL GAP ANALYSIS
 elif page == "Skill Gap Analysis":
