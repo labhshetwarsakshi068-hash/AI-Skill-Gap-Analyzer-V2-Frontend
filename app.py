@@ -36,11 +36,16 @@ def go_to(page):
 # Navigation
 if st.session_state.logged_in:
     pages = [
-        "Dashboard", "Resume Skills", "Skill Gap Analysis",
-        "Learning Roadmap", "AI Recommendations", "Logout"
+        "Dashboard",
+        "Resume Skills",
+        "Skill Gap Analysis",
+        "Learning Roadmap",
+        "AI Recommendations",
+        "Progress Tracking",
+        "Logout"
     ]
 else:
-    pages = ["Home", "Register", "Login", "Forgot Password"]
+    pages = ["Home", "Register", "Login", "Forgot Password"]"]
 
 with st.sidebar:
     st.markdown(
