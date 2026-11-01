@@ -1297,6 +1297,229 @@ elif page == "AI Recommendations":
                             f"Something went wrong: {error}"
                         )
 
+
+# =========================================================
+# PROGRESS TRACKING
+# =========================================================
+
+elif page == "Progress Tracking":
+
+    st.title("📊 Learning Progress Tracking")
+    st.caption(
+        "Track your completed and pending skills for your target career role."
+    )
+
+    token = st.session_state.get("token")
+    user = st.session_state.get("user") or {}
+    user_id = user.get("id")
+
+    if not token or not user_id:
+
+        st.warning("Please log in again to view your progress.")
+
+    else:
+
+        analysis = st.session_state.get("skill_gap_result") or {}
+
+        selected_role_name = (
+            analysis.get("role")
+            or user.get("target_role")
+            or user.get("target_role_name")
+            or user.get("role")
+        )
+
+        if not selected_role_name:
+
+            st.warning(
+                "Please select your target role in Skill Gap Analysis first."
+            )
+
+        else:
+
+            # GET ROLE ID
+
+            roles_status, roles_result = get_job_roles()
+
+            if roles_status != 200:
+
+                st.error("Could not load job roles.")
+
+            else:
+
+                roles = (
+                    roles_result.get("job_roles")
+                    or roles_result.get("roles")
+                    or roles_result.get("data")
+                    or []
+                )
+
+                selected_role_id = analysis.get("role_id")
+
+                if not selected_role_id:
+
+                    for role in roles:
+
+                        role_name = (
+                            role.get("role_name")
+                            or role.get("name")
+                            or role.get("title")
+                        )
+
+                        if role_name == selected_role_name:
+
+                            selected_role_id = (
+                                role.get("id")
+                                or role.get("role_id")
+                            )
+                            break
+
+                if not selected_role_id:
+
+                    st.error("Could not identify your target role ID.")
+
+                else:
+
+                    st.write(f"**Target Role:** {selected_role_name}")
+
+                    # FETCH SAVED PROGRESS
+
+                    status, result = get_progress(
+                        token,
+                        user_id,
+                        selected_role_id
+                    )
+
+                    if status == 200 and result.get("success"):
+
+                        skills = result.get("skills", [])
+
+                        total = result.get("total_skills", 0)
+                        completed = result.get("completed_skills", 0)
+                        pending = result.get("pending_skills", 0)
+                        percentage = result.get("progress_percentage", 0)
+
+                        # PROGRESS SUMMARY
+
+                        col1, col2, col3 = st.columns(3)
+
+                        col1.metric("Total Skills", total)
+                        col2.metric("Completed", completed)
+                        col3.metric("Pending", pending)
+
+                        st.subheader("Overall Learning Progress")
+
+                        st.progress(
+                            min(max(float(percentage) / 100, 0.0), 1.0)
+                        )
+
+                        st.write(f"**{percentage}% Completed**")
+
+                        st.divider()
+
+                        st.subheader("Your Skills Checklist")
+
+                        # SAVE STATUS WHEN CHECKBOX CHANGES
+
+                        def save_skill_progress(
+                            skill_id,
+                            widget_key,
+                            auth_token,
+                            current_user_id,
+                            current_role_id
+                        ):
+
+                            new_status = bool(
+                                st.session_state[widget_key]
+                            )
+
+                            save_status, save_result = update_progress(
+                                auth_token,
+                                current_user_id,
+                                current_role_id,
+                                skill_id,
+                                new_status
+                            )
+
+                            if save_status != 200:
+
+                                st.session_state["progress_save_error"] = (
+                                    save_result.get(
+                                        "message",
+                                        "Could not save progress."
+                                    )
+                                )
+
+                            else:
+
+                                st.session_state.pop(
+                                    "progress_save_error",
+                                    None
+                                )
+
+                        # DISPLAY SKILLS
+
+                        for skill in skills:
+
+                            skill_id = skill.get("skill_id")
+                            skill_name = skill.get("skill_name")
+
+                            if skill_id is None or not skill_name:
+                                continue
+
+                            widget_key = (
+                                f"progress_{user_id}_"
+                                f"{selected_role_id}_{skill_id}"
+                            )
+
+                            if widget_key not in st.session_state:
+
+                                st.session_state[widget_key] = bool(
+                                    skill.get("is_completed", False)
+                                )
+
+                            st.checkbox(
+                                f"{skill_name}",
+                                key=widget_key,
+                                on_change=save_skill_progress,
+                                args=(
+                                    skill_id,
+                                    widget_key,
+                                    token,
+                                    user_id,
+                                    selected_role_id
+                                )
+                            )
+
+                        save_error = st.session_state.get(
+                            "progress_save_error"
+                        )
+
+                        if save_error:
+                            st.error(save_error)
+
+                        st.caption(
+                            "Your progress is automatically saved when "
+                            "you mark or unmark a skill."
+                        )
+
+                        if total > 0 and completed == total:
+
+                            st.success(
+                                "🎉 Congratulations! You have completed "
+                                "all skills for this role."
+                            )
+
+                    else:
+
+                        st.error("Could not load your learning progress.")
+
+                        st.write(
+                            result.get(
+                                "message",
+                                f"Request failed (status: {status})."
+                            )
+                        )
+
 # LOGOUT
 elif page == "Logout":
     st.session_state.logged_in = False
